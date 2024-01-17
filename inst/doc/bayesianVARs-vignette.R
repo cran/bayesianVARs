@@ -26,12 +26,10 @@ mod <- bvar(train_data, lags = 2L, draws = 10000, burnin = 2000,
 ## ----out.width="80%", fig.align='center', fig.cap="Visualization of estimated in-sample prediction intervals. The red solid line depicts the median, the red shaded region the 90% credible interval and the black dotted line the observed data used for estimation.", fig.pos="t"----
 plot(mod, quantiles = c(0.05,0.5,0.95), dates = rownames(mod$Yraw))
 
-## ----out.width="50%", fig.align='center', fig.cap="Posterior summary of the VAR coefficients. Left: Heatmap of the posterior median. Right: Heatmap of the posterior interquartile range.", fig.pos="t"----
+## ----out.width="45%", fig.asp=1.5,fig.align='center', fig.cap="Posterior summary of the VAR coefficients. Left: Heatmap of the posterior median. Right: Heatmap of the posterior interquartile range.", fig.pos="t", fig.show='hold'----
 phi <- coef(mod)
-oldpar <- par(mfrow=c(1,2))
 posterior_heatmap(phi,median)
 posterior_heatmap(phi, IQR)
-par(oldpar)
 
 ## ----results='hide'-----------------------------------------------------------
 pred <- predict(mod, ahead = 1:4, LPL = TRUE, Y_obs = test_data)
