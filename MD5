@@ -1,6 +1,6 @@
-31afb68953cb23d85270b828c3b03b09 *DESCRIPTION
+bceca372dd0205c88a4056ebe6bddf87 *DESCRIPTION
 e97bb3382809a296a782abeb5b0e7479 *NAMESPACE
-5659f0a0a13a19c81ed013fa89f1aacd *NEWS.md
+b6aaafcd80a7ef7f93d94cc7c515e2ef *NEWS.md
 ddfecf115c1b5cb8e8a7ed6d4f8144aa *R/Imports.R
 72812a41a694ab39aa61e4930972e2b4 *R/RcppExports.R
 f9e7b781d03ff56fb8269d41a6b3fbe7 *R/aux_functions.R
@@ -8,14 +8,14 @@ f9e7b781d03ff56fb8269d41a6b3fbe7 *R/aux_functions.R
 6b4a528bcaf5c349478709486e0b7703 *R/data.R
 7fe7b2aeb35d2fd33d65aa699372347f *R/package.R
 9fad5c7c6a7bfce7d07598d939d5469f *R/plots.R
-ccc1f7dfc2fd23f2a5e60a919ea0e70a *R/utility_functions.R
+eed7c1a5e8aca49c0e5bbb5bd979d875 *R/utility_functions.R
 7740dc91e7ae7b6b98ca7b918ec45107 *README.md
 afbe4209b3bb961ba3e41cbfe79ea507 *build/partial.rdb
 48bd944d8cd84d2fba41f4b6b0162449 *build/vignette.rds
 981424f388b17533f3735eca500a41a6 *data/usmacro_growth.rda
 d6a95c8be2e4a8f08616a32a11c57906 *inst/doc/bayesianVARs-vignette.R
 87cd8d6be8a2f2ebdc558860dc900d12 *inst/doc/bayesianVARs-vignette.Rmd
-c1e024a0ca6534d11527fad43506672c *inst/doc/bayesianVARs-vignette.pdf
+1205cb33a95bdb3172584687b3db3423 *inst/doc/bayesianVARs-vignette.pdf
 4bb19c691fbd45d225c6e25175107a0b *man/bvar.Rd
 baf3d50c46383b072e687e0d8626445e *man/coef.Rd
 25f4f8f02124665f66021dd06afa5323 *man/figures/logo.png
@@ -40,7 +40,7 @@ c731844a9e3b65c3b80a6d491355e8ea *man/sub-.bayesianVARs_draws.Rd
 59d3b619261d881fbb0a4952d519b132 *man/summary.bayesianVARs_draws.Rd
 2802ed45f913b6f97d9dc59206e818c9 *man/summary.bayesianVARs_predict.Rd
 a2fc7c2ed67b030298644aeba2ef89ef *man/usmacro_growth.Rd
-2bcb46a30cf5d3d23a17ef246d90d026 *man/vcov.bayesianVARs_bvar.Rd
+ed265e67f2c4db725ba812d2169e6cf7 *man/vcov.bayesianVARs_bvar.Rd
 72e7d9ed9a05151ccb0456f25b7c49f6 *src/Makevars
 72e7d9ed9a05151ccb0456f25b7c49f6 *src/Makevars.win
 9d0655da36c341b3a85db05eb3e6fd81 *src/RcppExports.cpp
@@ -48,7 +48,7 @@ faca3f992c5d521cd8026a5906e009cc *src/bvar_cpp.cpp
 6065148296816afb070fd7300fe78056 *src/gig_vec.cpp
 c88e72402020d109eb5b85690fed9375 *src/sample_coefficients.cpp
 50dcf0c4f964f758417d86593830814c *src/sample_coefficients.h
-aa6bfac692690acec63c95e64a218647 *src/utilities_cpp.cpp
+2c899fc082d9ea1d91daa60c6ac2eac0 *src/utilities_cpp.cpp
 05ce1e1eb9d8705e1c6ce6eaf8d7a55e *tests/testthat.R
 58b2a92d73d1a64a8c16ed0f70eff0b1 *tests/testthat/setup-all.R
 a42afd057332e4a82378dede02d26119 *tests/testthat/test-bvar.R
