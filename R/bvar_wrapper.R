@@ -73,7 +73,7 @@
 #'  To sample efficiently the reduced-form VAR coefficients, assuming a
 #'  **cholesky-structure for the errors**, the corrected triangular algorithm in
 #'  Carriero et al. (2021) is implemented. The SV parameters and latent
-#'  variables are sampled using package \code{\link{stochvol}}'s
+#'  variables are sampled using package \code{\link[stochvol]{stochvol}}'s
 #'  \code{\link[stochvol]{update_fast_sv}} function. The precision parameters,
 #'  i.e. the free off-diagonal elements in \eqn{\boldsymbol{U}}, are sampled as in
 #'  Cogley and Sargent (2005).
@@ -551,7 +551,7 @@ bvar <- function(data,
                       phi = c(rep(.8, M), rep(.8, prior_sigma$factor_factors)) + pmin(rnorm(M + prior_sigma$factor_factors, sd=.06), .095),
                       sigma = rep(.1, M + prior_sigma$factor_factors) + rgamma(M + prior_sigma$factor_factors, 1, 10))
     startlogvar <- matrix(startpara["mu",][1] + rnorm(Tobs*(M + prior_sigma$factor_factors)), Tobs, M + prior_sigma$factor_factors)
-    startlogvar[,M+which(isFALSE(prior_sigma$sv_heteroscedastic[-c(1:M)]))] <- 0 # !!! important, needed for factorstochvol: if factor is assumed to be homoscedastic, the corresponding column in logvar has to be 0!!!
+    startlogvar[,M+which(prior_sigma$sv_heteroscedastic[-c(1:M)]==FALSE)] <- 0 # !!! important, needed for factorstochvol: if factor is assumed to be homoscedastic, the corresponding column in logvar has to be 0!!!
     startlogvar0 <- startpara["mu",][1] + rnorm(M + prior_sigma$factor_factors)
     starttau2 <- if(!prior_sigma$factor_ngprior){ # if prior is 'normal'
       prior_sigma$factor_starttau2
