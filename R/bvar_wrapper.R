@@ -46,8 +46,8 @@
 #'  \code{thin=1L}.
 #'@param prior_intercept Either \code{prior_intercept=FALSE} and no constant
 #'  term (intercept) will be included. Or a numeric vector of length \eqn{M}
-#'  indicating the (fixed) prior variances on the constant term. A single number
-#'  will be recycled accordingly. Default is \code{prior_intercept=100}.
+#'  indicating the (fixed) prior standard deviations on the constant term. A single number
+#'  will be recycled accordingly. Default is \code{prior_intercept=10}.
 #'@param prior_phi \code{bayesianVARs_prior_phi} object specifying prior for the
 #'  reduced form VAR coefficients. Best use constructor
 #'  \code{\link{specify_prior_phi}}.
@@ -171,7 +171,7 @@ bvar <- function(data,
                  draws=1000L,
                  burnin=1000L,
                  thin = 1L,
-                 prior_intercept = 100,
+                 prior_intercept = 10,
                  prior_phi = specify_prior_phi(data = data, lags = lags, prior = "HS"),
                  prior_sigma = specify_prior_sigma(data = data, type = "factor", quiet = TRUE),
                  sv_keep = "last",
@@ -260,6 +260,7 @@ bvar <- function(data,
     intercept <- 0
     priorIntercept <- vector("numeric")
   }else{
+    prior_intercept <- prior_intercept^2 # transform to variances
     if(length(prior_intercept)==1L){
       priorIntercept <- rep(prior_intercept, M)
     }else if(length(prior_intercept)==M){
@@ -270,7 +271,6 @@ bvar <- function(data,
 
     intercept <- 1
   }
-
   PHI0 <- matrix(0, K+intercept, M) # prior mean of intercept is 0
   PHI0[1:K,] <- prior_phi$PHI0 # prior mean of VAR coefficients is specified with specify_prior_phi()
 
