@@ -1,6 +1,6 @@
 Package: bayesianVARs
 Title: MCMC Estimation of Bayesian Vectorautoregressions
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: c(
     person("Luis", "Gruber", , "Luis.Gruber@aau.at", role = c("cph", "aut", "cre"),
            comment = c(ORCID = "0000-0002-2399-738X")),
@@ -30,9 +30,9 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.1
 NeedsCompilation: yes
-Packaged: 2024-09-05 18:48:30 UTC; lugruber
+Packaged: 2024-11-13 20:37:23 UTC; lugruber
 Author: Luis Gruber [cph, aut, cre] (<https://orcid.org/0000-0002-2399-738X>),
   Gregor Kastner [ctb] (<https://orcid.org/0000-0002-8237-8271>)
 Maintainer: Luis Gruber <Luis.Gruber@aau.at>
 Repository: CRAN
-Date/Publication: 2024-09-06 15:00:06 UTC
+Date/Publication: 2024-11-13 20:50:02 UTC
