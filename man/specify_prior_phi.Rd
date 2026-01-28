@@ -181,7 +181,7 @@ Configures prior on PHI, the matrix of reduced-form VAR coefficients.
 }
 \details{
 For details concerning prior-elicitation for VARs please see Gruber & Kastner
-(2023).
+(2025).
 
 Currently one can choose between six hierarchical shrinkage priors and a
 normal prior: \code{prior="HS"} stands for the Horseshoe-prior, \verb{prior="R2D2} for
@@ -221,7 +221,7 @@ mod <- bvar(data, lags = 2L, prior_phi = phi_hs_sg, quiet = TRUE)
 }
 }
 \references{
-Gruber, L. and Kastner, G. (2023). Forecasting macroeconomic data
-with Bayesian VARs: Sparse or dense? It depends!
-\href{https://arxiv.org/abs/2206.04902}{arXiv:2206.04902}.
+Gruber, L. and Kastner, G. (2025). Forecasting macroeconomic data
+with Bayesian VARs: Sparse or dense? It depends! \emph{International Journal
+of Forecasting}. \doi{10.1016/j.ijforecast.2025.02.001}.
 }

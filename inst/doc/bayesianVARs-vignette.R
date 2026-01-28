@@ -5,6 +5,7 @@ knitr::opts_chunk$set(
 )
 
 ## ----results='hide'-----------------------------------------------------------
+set.seed(123)
 library(bayesianVARs)
 variables <- c("GDPC1", "GDPCTPI",  "FEDFUNDS", "EXUSUKx", "S&P 500")
 train_data <- 100 * usmacro_growth[1:230, variables]
@@ -28,8 +29,10 @@ plot(mod, quantiles = c(0.05,0.5,0.95), dates = rownames(mod$Yraw))
 
 ## ----out.width="45%", fig.asp=1.5,fig.align='center', fig.cap="Posterior summary of the VAR coefficients. Left: Heatmap of the posterior median. Right: Heatmap of the posterior interquartile range.", fig.pos="t", fig.show='hold'----
 phi <- coef(mod)
-posterior_heatmap(phi,median)
-posterior_heatmap(phi, IQR)
+posterior_heatmap(phi, median, detect_lags = TRUE, 
+                  border_color = rgb(0,0,0, alpha = 0.2))
+posterior_heatmap(phi, IQR, detect_lags = TRUE, 
+                  border_color = rgb(0,0,0, alpha = 0.2))
 
 ## ----results='hide'-----------------------------------------------------------
 pred <- predict(mod, ahead = 1:4, LPL = TRUE, Y_obs = test_data)
