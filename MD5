@@ -1,6 +1,6 @@
-0696b8f8919380931eff042ba4dfe5b6 *DESCRIPTION
+562e10fbc77dea3cb8946279b61cf46f *DESCRIPTION
 7a981d3366b20e6b8fd09c82bb3a36c9 *NAMESPACE
-91fdaaf1f2e6ad2e1f0963c22b80f278 *NEWS.md
+6acd5a6383e9972e81dd56b58c501f38 *NEWS.md
 ddfecf115c1b5cb8e8a7ed6d4f8144aa *R/Imports.R
 48bade603d49e1e2a5a7ef7916fe272b *R/RcppExports.R
 f9e7b781d03ff56fb8269d41a6b3fbe7 *R/aux_functions.R
@@ -17,7 +17,7 @@ bf982c318cbb172287bdc53a97fc208b *README.md
 4787af44d17076d68b2e4e5ef8ca5d04 *inst/CITATION
 049a63626a9c7e590dc8193548a7cf73 *inst/doc/bayesianVARs-vignette.R
 870ddf0f6ab4b114acbe553889a699b7 *inst/doc/bayesianVARs-vignette.Rmd
-831e148feaeb8365d5f159f9af2f5bf1 *inst/doc/bayesianVARs-vignette.pdf
+cafcedfd15bab36b6ae94148f8173a2c *inst/doc/bayesianVARs-vignette.pdf
 eb5cbda5ff965ac21cdb466815213f85 *inst/doc/irf-vignette.R
 7b5fc830fe14f9b4753a2ff6c86b6981 *inst/doc/irf-vignette.Rmd
 530f0ca80133cb89682f70103171c96f *inst/doc/irf-vignette.html
@@ -60,14 +60,16 @@ ed265e67f2c4db725ba812d2169e6cf7 *man/vcov.bayesianVARs_bvar.Rd
 ac3a674b76f9d7e445f8299a1003618c *src/RcppExports.cpp
 88fc02c2db98ad38517fa0f2b83e2104 *src/bvar_cpp.cpp
 6065148296816afb070fd7300fe78056 *src/gig_vec.cpp
-8dd5281504a0e264c69c650abe3f9f4b *src/irf.cpp
+5e3dff713dec5f83dae3d11a27f45ac8 *src/irf.cpp
+efb3f315f903c1fa92791efb4fb4e970 *src/lpSolve.cpp
+2a71629a7f583c95ce2034ecc63d5dc0 *src/lpSolve.h
 c88e72402020d109eb5b85690fed9375 *src/sample_coefficients.cpp
 779a26da6f9fb948e80eb0c79bd49267 *src/sample_coefficients.h
-987be4e3f43ab37e282fda68df13721f *src/utilities_cpp.cpp
+251f0d461655c22dc76e0322f4dc6b42 *src/utilities_cpp.cpp
 be271d7f70fc48169e4ffaec06e00210 *src/utilities_cpp.h
 05ce1e1eb9d8705e1c6ce6eaf8d7a55e *tests/testthat.R
 f3c9bedc9acb112b4e30e40881a5ba57 *tests/testthat/setup-all.R
-d41c011f09f98b4830791a8dc9afaa9e *tests/testthat/test-bvar.R
+300681b27659ac034c45cdf7e8133ba8 *tests/testthat/test-bvar.R
 9145290711dbaecb0c92cfa321ba8d62 *tests/testthat/test-irf.R
 870ddf0f6ab4b114acbe553889a699b7 *vignettes/bayesianVARs-vignette.Rmd
 04c3472b9e29d7ba69e21220fd04e56a *vignettes/huge.bib

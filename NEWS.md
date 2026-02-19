@@ -1,3 +1,11 @@
+# bayesianVARs 0.1.8
+
+* fixed CRAN check (memory access) issues. Thanks to Brian Ripley for pointing them out.
+
+# bayesianVARs 0.1.7
+
+* fixed CRAN check issues. Thanks to Brian Ripley for pointing them out.
+
 # bayesianVARs 0.1.6
 
 * Welcome Stefan Haan as contributor to the package!

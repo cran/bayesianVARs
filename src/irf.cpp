@@ -1,7 +1,10 @@
+#include <array>
 #include <memory>
 #include <list>
 #include <lp_lib.h>
 #include "utilities_cpp.h"
+#include "lpSolve.h"
+#include <optional>
 
 inline cube Sigma_chol_t_draws (
 	const uword n_variables,
@@ -113,43 +116,49 @@ Rcpp::List compute_parameter_transformations (
 	return ret;
 }
 
-uword count(const Rcpp::LogicalVector& vec) {
-	// vec can contain the values TRUE, FALSE and notably NA_LOGICAL
-	uword counter = 0;
-	for(int i = 0; i < vec.size(); i++) {
-		if (vec[i] == TRUE) counter++;
-	}
-	return counter;
-}
-
-mat construct_zero_restriction(const NumericMatrix::ConstColumn& spec) {
-	const LogicalVector spec_is_zero = (spec == 0);
-	const uword n_zero_restrictions = count(spec_is_zero);
-
-	mat zero_restriction_matrix(n_zero_restrictions, spec.size());
+// see doi:10.1111/j.1467-937X.2009.00578.x section "5.2. A monetary SVAR"
+// for an example how the matrices produced by this function should look like.
+// In short: If spec[i] is zero for index i, add the unit vector e_i to
+// the rows of the result.
+std::optional<mat> construct_zero_restriction(const NumericMatrix::ConstColumn& spec) {
+	const auto n = spec.size();
+	mat zero_restriction_matrix(n, n);
 	uword i = 0;
-	for (uword j = 0; j < spec_is_zero.size(); j++) {
-		if (spec_is_zero[j] == TRUE) {
+	for (R_xlen_t j = 0; j < n; j++) {
+		if (spec[j] == 0) {
 			zero_restriction_matrix(i++, j) = 1;
 		}
 	}
-	return zero_restriction_matrix;
+	if (i > 0) {
+		return zero_restriction_matrix.head_rows(i);
+	} else {
+		// If spec contains no zero restrictions, return nothing:
+		// altough perfectly valid here, Armadillo triggers CRAN's UBSAN checks
+		// for matrices of size zero.
+		return {};
+	}
 }
 
-mat construct_sign_restriction (const NumericMatrix::ConstColumn& spec) {
-	const uword n_sign_restrictions = count(spec != 0);
-
-	mat sign_restriction_matrix(n_sign_restrictions, spec.size());
+// if spec[i] > 0, add unit vector e_i to the rows of the result;
+// if spec[i] < 0, add unit vector -e_i to the rows of the result.
+std::optional<mat> construct_sign_restriction (const NumericMatrix::ConstColumn& spec) {
+	const auto n = spec.size();
+	mat sign_restriction_matrix(n, n);
 	uword i = 0;
-	for (R_xlen_t j = 0; j < spec.size(); j++) {
-		if ((spec[j] > 0) == TRUE) {
+	for (R_xlen_t j = 0; j < n; j++) {
+		if (spec[j] > 0) {
 			sign_restriction_matrix(i++, j) = 1;
 		}
-		else if ((spec[j] < 0) == TRUE) {
+		else if (spec[j] < 0) {
 			sign_restriction_matrix(i++, j) = -1;
 		}
+		// else: spec[i] is either 0 or NA, so not a sign restriction
 	}
-	return sign_restriction_matrix;
+	if (i > 0) {
+		return sign_restriction_matrix.head_rows(i);
+	} else {
+		return {};
+	}
 }
 
 class Solver {
@@ -158,35 +167,20 @@ class Solver {
 	virtual vec solve() = 0;
 	virtual void recycle() = 0;
 	virtual void print() = 0;
+	virtual ~Solver() = default;
 };
 
 class LPSolver : public Solver {
 	using make_lp_func_ptr= lprec*(*)(int, int);
-	template<typename R, typename... T> using lp_func_ptr = R(*)(lprec*, T...);
+	// template<typename R, typename... T> using lp_func_ptr = R(*)(lprec*, T...);
+	using get_statustext_func_ptr = char* (*)(lprec*, int);
 	
 	private:
 	static constexpr double bigM = 10.0;
 	
-	//import routines from the R package "lpSolveAPI"
+	//import remaining routines from the R package "lpSolveAPI"
 	make_lp_func_ptr make_lp = (make_lp_func_ptr)R_GetCCallable("lpSolveAPI", "make_lp");
-	lp_func_ptr<void, int> set_verbose = (lp_func_ptr<void, int>)R_GetCCallable("lpSolveAPI", "set_verbose");
-	lp_func_ptr<void> set_maxim = (lp_func_ptr<void>)R_GetCCallable("lpSolveAPI", "set_maxim");
-	lp_func_ptr<bool, int, double> set_obj = (lp_func_ptr<bool, int, double>)R_GetCCallable("lpSolveAPI", "set_obj");
-	lp_func_ptr<bool, int, double, double> set_bounds = (lp_func_ptr<bool, int, double, double>)R_GetCCallable("lpSolveAPI", "set_bounds");
-	lp_func_ptr<bool, bool> set_add_rowmode = (lp_func_ptr<bool, bool>)R_GetCCallable("lpSolveAPI", "set_add_rowmode");
-	lp_func_ptr<bool, int, double*, int*, int, double> add_constraintex = (lp_func_ptr<bool, int, double*, int*, int, double>)R_GetCCallable("lpSolveAPI", "add_constraintex");
-	lp_func_ptr<int> lp_solve = (lp_func_ptr<int>)R_GetCCallable("lpSolveAPI", "solve");
-	lp_func_ptr<bool, double*> get_variables = (lp_func_ptr<bool, double*>)R_GetCCallable("lpSolveAPI", "get_variables");
-	lp_func_ptr<char*, int> get_statustext = (lp_func_ptr<char*, int>)R_GetCCallable("lpSolveAPI", "get_statustext");
-	lp_func_ptr<void> print_lp = (lp_func_ptr<void>)R_GetCCallable("lpSolveAPI", "print_lp");
-	lp_func_ptr<void> delete_lp = (lp_func_ptr<void>)R_GetCCallable("lpSolveAPI", "delete_lp");
-	lp_func_ptr<bool, int, double*, int*> set_obj_fnex = (lp_func_ptr<bool, int, double*, int*>)R_GetCCallable("lpSolveAPI", "set_obj_fnex");
-	lp_func_ptr<bool, int, int> resize_lp = (lp_func_ptr<bool, int, int>)R_GetCCallable("lpSolveAPI", "resize_lp");
-	lp_func_ptr<bool, int, bool> set_binary = (lp_func_ptr<bool, int, bool>)R_GetCCallable("lpSolveAPI", "set_binary");
-	lp_func_ptr<bool, int, char*> set_col_name = (lp_func_ptr<bool, int, char*>)R_GetCCallable("lpSolveAPI", "set_col_name");
-	lp_func_ptr<void, int, int> set_presolve = NULL; //do not combine presolve and recycling!!
-	lp_func_ptr<int> get_Nrows = (lp_func_ptr<int>)R_GetCCallable("lpSolveAPI", "get_Nrows");
-	lp_func_ptr<int> get_Ncolumns = (lp_func_ptr<int>)R_GetCCallable("lpSolveAPI", "get_Ncolumns");
+	get_statustext_func_ptr get_statustext = (get_statustext_func_ptr) R_GetCCallable("lpSolveAPI", "get_statustext");
 	
 	lprec *lp;
 	uword n; //dimension of x
@@ -200,8 +194,8 @@ class LPSolver : public Solver {
 		lp = (*make_lp)(0, 3*n);
 		if (lp == NULL) throw std::bad_alloc();
 		
-		(*set_verbose)(lp, IMPORTANT);
-		(*set_maxim)(lp);
+		setverbose(lp, IMPORTANT);
+		setmaxim(lp);
 		
 		// we have variables x_i, U_i, y_i for i=1...n
 		x_cols = regspace<ivec>(1, n);
@@ -210,24 +204,24 @@ class LPSolver : public Solver {
 		for (uword j = 0; j < n; j++) {
 			std::string col_name("x");
 			col_name += std::to_string(j+1);
-			(*set_col_name)(lp, x_cols[j], col_name.data());
+			setcol_name(lp, x_cols[j], col_name.data());
 			col_name[0] = 'U';
-			(*set_col_name)(lp, U_cols[j], col_name.data());
+			setcol_name(lp, U_cols[j], col_name.data());
 			col_name[0] = 'y';
-			(*set_col_name)(lp, y_cols[j], col_name.data());
+			setcol_name(lp, y_cols[j], col_name.data());
 		}
 		
-		(*set_add_rowmode)(lp, TRUE);
+		setadd_rowmode(lp, TRUE);
 				
 		// maximize over sum of U
 		vec ones(U_cols.n_elem, fill::ones);
-		(*set_obj_fnex)(lp, U_cols.n_elem, ones.memptr(), U_cols.memptr());
+		setobj_fnex(lp, U_cols.n_elem, ones.memptr(), U_cols.memptr());
 		
 		// set variable bounds
 		for (uword j = 0; j < n; j++) {
-			(*set_bounds)(lp, x_cols[j], -1, 1); //x_i in [-1, 1]
-			(*set_bounds)(lp, U_cols[j], 0, 1); //U_i in [0, 1]
-			(*set_binary)(lp, y_cols[j], TRUE); //y_i in {0, 1}
+			setbounds(lp, x_cols[j], -1, 1); //x_i in [-1, 1]
+			setbounds(lp, U_cols[j], 0, 1); //U_i in [0, 1]
+			setbinary(lp, y_cols[j], TRUE); //y_i in {0, 1}
 		}
 		
 		//setup initial constraints
@@ -238,17 +232,17 @@ class LPSolver : public Solver {
 		std::array<double, 3> right_constraint = {-1.0 /* x_i */, 1.0 /*U_i*/,  bigM /*y*/};
 		for (uword j = 0; j < n; j++) {
 			std::array<int, 3> cols = {x_cols[j], U_cols[j], y_cols[j]};
-			(*add_constraintex)(lp, cols.size(), left_constraint.data(), cols.data(), LE, 0);
-			(*add_constraintex)(lp, cols.size(), right_constraint.data(), cols.data(), LE, bigM);
+			addconstraintex(lp, cols.size(), left_constraint.data(), cols.data(), LE, 0);
+			addconstraintex(lp, cols.size(), right_constraint.data(), cols.data(), LE, bigM);
 		}
 		
 		//recycling will remove all constraints added by `add_constraint`
-		n_initial_rows = (*get_Nrows)(lp);
+		n_initial_rows = getNrows(lp);
 	}
 	
 	void add_constraints(mat& constraints, int constr_type, double rhs) override {
 		constraints.each_row([&](rowvec& row) {
-			const bool success = (*add_constraintex)(lp, n, row.memptr(), x_cols.memptr(), constr_type, rhs);
+			const bool success = addconstraintex(lp, n, row.memptr(), x_cols.memptr(), constr_type, rhs);
 			if (success == FALSE) {
 				throw std::runtime_error("Could not add constraints");
 			}
@@ -256,30 +250,30 @@ class LPSolver : public Solver {
 	}
 	
 	vec solve() override {
-		(*set_add_rowmode)(lp, FALSE);
-		int ret = (*lp_solve)(lp);
+		setadd_rowmode(lp, FALSE);
+		int ret = lpsolve(lp);
 		if(ret != 0) {
 			print();
 			throw std::logic_error((*get_statustext)(lp, ret));
 		};
 		vec lp_vars_store(3*n);
-		(*get_variables)(lp, lp_vars_store.memptr());
+		getvariables(lp, lp_vars_store.memptr());
 		return lp_vars_store.head_rows(n); // only return x
 	}
 	
 	void recycle() override {
 		// delete all non-initial constraints
-		(*resize_lp)(lp, n_initial_rows, (*get_Ncolumns)(lp));
-		(*set_add_rowmode)(lp, TRUE);
+		resizelp(lp, n_initial_rows, getNcolumns(lp));
+		setadd_rowmode(lp, TRUE);
 	}
 	
 	void print() override {
-		(*set_add_rowmode)(lp, FALSE);
-		(*print_lp)(lp);
+		setadd_rowmode(lp, FALSE);
+		printlp(lp);
 	}
 		
 	~LPSolver() {
-		(*delete_lp)(lp);
+		deletelp(lp);
 	}
 	
 };
@@ -361,11 +355,10 @@ Rcpp::List find_rotation_cpp(
 	const uword n_posterior_draws = parameter_transformations(0).n_slices;
 	
 	// rotation at index i belongs to sample with one-based-index rotation_sample_map[i]
-	// if the sample is rejected, rotation_sample_map[i] is set to zero
-	// treat values of the slice where rotation_sample_map is zero as undefined
 	std::list<uword> rotation_sample_map;
 	std::list<mat> rotations;
-	//cube rotation(n_variables, n_variables, n_posterior_draws, fill::none);
+	// we do not know how many samples will be rejected, so the return value is constructed later
+	//cube rotation(n_variables, n_variables, ?, fill::none);
 
 	std::unique_ptr<Solver> solver;
 	uword max_rotations_per_sample = 0;
@@ -385,11 +378,12 @@ Rcpp::List find_rotation_cpp(
 	field<mat> sign_restrictions(restriction_specs.n_elem, n_variables);
 	uvec n_zero_restrictions(n_variables, fill::zeros);
 	uvec n_sign_restrictions(n_variables, fill::zeros);
+	const mat no_restrictions(0, n_variables);
 	for (uword i = 0; i < restriction_specs.n_elem; i++) {
 		for (uword j = 0; j < n_variables; j++) {
 			const NumericMatrix::ConstColumn column_restriction_spec = restriction_specs(i).column(j);
-			zero_restrictions(i, j) = construct_zero_restriction(column_restriction_spec);
-			sign_restrictions(i, j) = construct_sign_restriction(column_restriction_spec);
+			zero_restrictions(i, j) = construct_zero_restriction(column_restriction_spec).value_or(no_restrictions);
+			sign_restrictions(i, j) = construct_sign_restriction(column_restriction_spec).value_or(no_restrictions);
 			n_zero_restrictions(j) += zero_restrictions(i, j).n_rows; //rank = n_rows by construction!
 			n_sign_restrictions(j) += sign_restrictions(i, j).n_rows; //rank = n_rows by construction!
 		}
@@ -409,8 +403,10 @@ Rcpp::List find_rotation_cpp(
 			const uword j = col_order[j_index];
 			
 			// the column j of the rotation matrix must be orthogonal to columns that came before
-			mat previous_columns = rotation.cols(col_order.head(j_index)).t();
-			solver->add_constraints(previous_columns, EQ, 0);
+			if (j_index > 0) {
+			  mat previous_columns = rotation.cols(col_order.head(j_index)).t();
+			  solver->add_constraints(previous_columns, EQ, 0);
+			}
 			
 			if (n_zero_restrictions(j) > 0) {
 				for (uword i = 0; i < parameter_transformations.n_elem; i++) {
